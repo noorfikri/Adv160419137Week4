@@ -18,5 +18,9 @@
         android:id="@+id/studentDetailFragment"
         android:name="com.ubaya.adv160419137week4.view.StudentDetailFragment"
         android:label="fragment_student_detail"
-        tools:layout="@layout/fragment_student_detail" />
+        tools:layout="@layout/fragment_student_detail" >
+        <argument
+            android:name="studentId"
+            app:argType="string" />
+    </fragment>
 </navigation>
