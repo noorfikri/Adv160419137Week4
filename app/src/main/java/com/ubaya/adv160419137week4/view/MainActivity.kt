@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
 
         val observable = Observable.just("Hello","Text","1","2","3")
 
+        //test
         val observer = object : Observer<String>{
             override fun onSubscribe(d: Disposable) {
                 Log.d("observermessage","Begin Subscribe")
