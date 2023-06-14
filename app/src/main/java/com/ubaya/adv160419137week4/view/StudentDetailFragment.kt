@@ -10,10 +10,13 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
+import androidx.navigation.Navigation
 import com.ubaya.adv160419137week4.R
+import com.ubaya.adv160419137week4.databinding.FragmentStudentDetailBinding
 import com.ubaya.adv160419137week4.util.loadImage
 import com.ubaya.adv160419137week4.util.showNotification
 import com.ubaya.adv160419137week4.viewmodel.DetailViewModel
@@ -33,15 +36,17 @@ private const val ARG_PARAM2 = "param2"
  * Use the [StudentDetailFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class StudentDetailFragment : Fragment() {
+class StudentDetailFragment : Fragment(), ButtonNotificationClickListener,ButtonUpdateClickListener {
     private lateinit var viewModel: DetailViewModel
+    private lateinit var dataBinding:FragmentStudentDetailBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_student_detail, container, false)
+        dataBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_student_detail, container, false)
+        return dataBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -63,34 +68,29 @@ class StudentDetailFragment : Fragment() {
 
     fun observeViewModel(view: View){
         viewModel.studentLD.observe(viewLifecycleOwner, Observer {
-            val txtID = view.findViewById<TextView>(R.id.txtID)
-            val txtName = view.findViewById<TextView>(R.id.txtName)
-            val txtBoD = view.findViewById<TextView>(R.id.txtBoD)
-            val txtPhone = view.findViewById<TextView>(R.id.txtPhone)
-            var imageView = view.findViewById<ImageView>(R.id.imgStudent)
-            var progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
-            val btnNotif = view.findViewById<Button>(R.id.btnNotif)
+            dataBinding.student = it
+            dataBinding.notificationListener = this
+        })
+    }
 
-            val name = it.name.toString()
+    override fun onNotificationClick(v: View) {
+        val btnNotif = view?.findViewById<Button>(R.id.btnNotif)
 
-            imageView.loadImage(it.photoUrl,progressBar)
-
-            txtID.text = it.id.toString()
-            txtName.text = name
-            txtBoD.text = it.dob.toString()
-            txtPhone.text = it.phone.toString()
-
-            btnNotif.setOnClickListener {
-                val observable = Observable.timer(5, TimeUnit.SECONDS).apply {
-                    subscribeOn(Schedulers.io())
-                    observeOn(AndroidSchedulers.mainThread())
-                    subscribe {
-                        Log.d("observermessage","Five Seconds")
-                        showNotification(name,"A new notification created",
-                            com.google.android.material.R.drawable.ic_mtrl_checked_circle)
-                    }
+        btnNotif?.setOnClickListener {
+            val observable = Observable.timer(5, TimeUnit.SECONDS).apply {
+                subscribeOn(Schedulers.io())
+                observeOn(AndroidSchedulers.mainThread())
+                subscribe {
+                    Log.d("observermessage","Five Seconds")
+                    showNotification(btnNotif.tag.toString(),"A new notification created",
+                        com.google.android.material.R.drawable.ic_mtrl_checked_circle)
                 }
             }
-        })
+        }
+    }
+
+    override fun onButtonUpdateClick(v: View) {
+        val action = StudentDetailFragmentDirections.actionUpdateStudent()
+        Navigation.findNavController(v).navigate(action)
     }
 }
